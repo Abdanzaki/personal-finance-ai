@@ -266,7 +266,7 @@ def generate_grounded_ai_response(
 
         client = genai.Client(api_key=api_key)
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.8-flash",
             contents=prompt_content,
             config=types.GenerateContentConfig(
                 system_instruction=SYSTEM_INSTRUCTION,
