@@ -112,3 +112,4 @@ backend/finance_dev.db
 node_modules/
 *.zip
 *.tar.gz
+.vercel

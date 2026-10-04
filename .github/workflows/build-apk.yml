@@ -1,0 +1,67 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'app/**'
+      - '.github/workflows/build-apk.yml'
+  workflow_dispatch:
+    inputs:
+      api_base_url:
+        description: 'Backend API Base URL for the APK'
+        required: false
+        default: 'https://placeholder-api.example.com/api/v1'
+        type: string
+
+jobs:
+  build-apk:
+    name: Build & Package Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.6'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Analyze code
+        working-directory: app
+        run: flutter analyze
+
+      # Signing Note:
+      # The resulting APK is built using Flutter's default release configuration.
+      # This is suitable for direct Android sideloading, emulator testing, and QA.
+      # For official Google Play Store distribution, configure upload keystore (.jks)
+      # and android/key.properties as documented in README.md and DEPLOY.md.
+      - name: Build Android Release APK
+        working-directory: app
+        run: |
+          API_URL="${{ inputs.api_base_url || 'https://placeholder-api.example.com/api/v1' }}"
+          echo "Building APK with API_BASE_URL: $API_URL"
+          flutter build apk --release --dart-define=API_BASE_URL="$API_URL"
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: personal-finance-ai-apk
+          path: app/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+          if-no-files-found: error

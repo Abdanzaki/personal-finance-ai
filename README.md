@@ -205,6 +205,14 @@ Output: `app/build/app/outputs/flutter-apk/app-release.apk`
    ```
 4. Upload `app/build/app/outputs/bundle/release/app-release.aab` to Google Play Console.
 
+### 3. Download Automated Release APK via GitHub Actions
+Every push to `main` impacting the `app/` directory (or manual run via GitHub Actions) triggers the `.github/workflows/build-apk.yml` CI workflow:
+1. Navigate to the repository's [Actions Tab](https://github.com/Abdanzaki/personal-finance-ai/actions/workflows/build-apk.yml).
+2. Select the latest run of **Build Android APK**.
+3. Under the **Artifacts** section at the bottom of the page, download **`personal-finance-ai-apk`**.
+4. Extract the zip file and sideload `app-release.apk` directly onto any Android device or emulator.
+*(Note: The CI APK is signed with Flutter's release configuration, suitable for sideloading and testing. Play Store uploads require keystore signing as noted above).*
+
 ---
 
 ## Environment Variables (`backend/.env.example`)
