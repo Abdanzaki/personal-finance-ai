@@ -1,3 +1,5 @@
+import '../utils/json.dart';
+
 class RecentTransactionItem {
   final String id;
   final String title;
@@ -22,7 +24,7 @@ class RecentTransactionItem {
     return RecentTransactionItem(
       id: json['id'] as String,
       title: json['title'] as String? ?? 'Transaction',
-      amount: (json['amount'] as num).toDouble(),
+      amount: parseDouble(json['amount']),
       type: json['type'] as String? ?? 'expense',
       category: json['category'] as String? ?? 'General',
       date: DateTime.parse(json['date'] as String),
@@ -54,12 +56,12 @@ class DashboardSummaryModel {
   factory DashboardSummaryModel.fromJson(Map<String, dynamic> json) {
     final rawRecent = json['recent_transactions'] as List<dynamic>? ?? [];
     return DashboardSummaryModel(
-      totalBalance: (json['total_balance'] as num?)?.toDouble() ?? 0.0,
+      totalBalance: parseDouble(json['total_balance']),
       primaryAccount: json['primary_account'] as String? ?? 'Primary Account',
-      monthlyIn: (json['monthly_in'] as num?)?.toDouble() ?? 0.0,
-      monthlyOut: (json['monthly_out'] as num?)?.toDouble() ?? 0.0,
-      netSavings: (json['net_savings'] as num?)?.toDouble() ?? 0.0,
-      savingsRatePct: (json['savings_rate_pct'] as num?)?.toDouble() ?? 0.0,
+      monthlyIn: parseDouble(json['monthly_in']),
+      monthlyOut: parseDouble(json['monthly_out']),
+      netSavings: parseDouble(json['net_savings']),
+      savingsRatePct: parseDouble(json['savings_rate_pct']),
       recentTransactions: rawRecent.map((e) => RecentTransactionItem.fromJson(e as Map<String, dynamic>)).toList(),
       aiPulse: json['ai_pulse'] as Map<String, dynamic>? ?? {
         'title': 'AI Intelligence Pulse',

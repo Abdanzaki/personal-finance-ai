@@ -1,3 +1,5 @@
+import '../utils/json.dart';
+
 class BudgetModel {
   final String id;
   final String userId;
@@ -32,11 +34,11 @@ class BudgetModel {
       id: json['id'] as String,
       userId: json['user_id'] as String,
       category: json['category'] as String,
-      limitAmount: (json['limit_amount'] as num).toDouble(),
+      limitAmount: parseDouble(json['limit_amount']),
       periodMonth: json['period_month'] as String,
-      spentAmount: (json['spent_amount'] as num?)?.toDouble() ?? 0.0,
-      remainingAmount: (json['remaining_amount'] as num?)?.toDouble() ?? 0.0,
-      percentageUsed: (json['percentage_used'] as num?)?.toDouble() ?? 0.0,
+      spentAmount: parseDouble(json['spent_amount']),
+      remainingAmount: parseDouble(json['remaining_amount']),
+      percentageUsed: parseDouble(json['percentage_used']),
       isWarning: json['is_warning'] as bool? ?? false,
       isExceeded: json['is_exceeded'] as bool? ?? false,
       createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'] as String) : null,
@@ -78,8 +80,8 @@ class BudgetListResponse {
     final rawItems = json['items'] as List<dynamic>? ?? [];
     return BudgetListResponse(
       month: json['month'] as String? ?? '',
-      totalBudget: (json['total_budget'] as num?)?.toDouble() ?? 0.0,
-      totalSpent: (json['total_spent'] as num?)?.toDouble() ?? 0.0,
+      totalBudget: parseDouble(json['total_budget']),
+      totalSpent: parseDouble(json['total_spent']),
       items: rawItems.map((e) => BudgetModel.fromJson(e as Map<String, dynamic>)).toList(),
     );
   }

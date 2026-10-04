@@ -1,3 +1,5 @@
+import '../utils/json.dart';
+
 class ReportSummaryModel {
   final String timeframe;
   final String? month;
@@ -21,8 +23,8 @@ class ReportSummaryModel {
       timeframe: json['timeframe'] as String? ?? 'monthly',
       month: json['month'] as String?,
       auditReady: json['audit_ready'] as bool? ?? true,
-      tax80cLimit: (json['tax_80c_limit'] as num?)?.toDouble() ?? 150000.0,
-      tax80cUtilized: (json['tax_80c_utilized'] as num?)?.toDouble() ?? 0.0,
+      tax80cLimit: parseDouble(json['tax_80c_limit'], 150000.0),
+      tax80cUtilized: parseDouble(json['tax_80c_utilized']),
     );
   }
 }

@@ -1,3 +1,5 @@
+import '../utils/json.dart';
+
 class SavingsGoalModel {
   final String id;
   final String userId;
@@ -35,12 +37,12 @@ class SavingsGoalModel {
       userId: json['user_id'] as String,
       title: json['title'] as String,
       category: json['category'] as String,
-      targetAmount: (json['target_amount'] as num).toDouble(),
-      currentAmount: (json['current_amount'] as num?)?.toDouble() ?? 0.0,
+      targetAmount: parseDouble(json['target_amount']),
+      currentAmount: parseDouble(json['current_amount']),
       targetDate: json['target_date'] as String,
       imageUrl: json['image_url'] as String?,
       isCompleted: json['is_completed'] as bool? ?? false,
-      progressPercentage: (json['progress_percentage'] as num?)?.toDouble() ?? 0.0,
+      progressPercentage: parseDouble(json['progress_percentage']),
       createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'] as String) : null,
       updatedAt: json['updated_at'] != null ? DateTime.tryParse(json['updated_at'] as String) : null,
     );
@@ -78,9 +80,9 @@ class GoalListResponse {
   factory GoalListResponse.fromJson(Map<String, dynamic> json) {
     final rawGoals = json['goals'] as List<dynamic>? ?? [];
     return GoalListResponse(
-      totalSaved: (json['total_saved'] as num?)?.toDouble() ?? 0.0,
-      totalTarget: (json['total_target'] as num?)?.toDouble() ?? 0.0,
-      activeGoalsCount: json['active_goals_count'] as int? ?? 0,
+      totalSaved: parseDouble(json['total_saved']),
+      totalTarget: parseDouble(json['total_target']),
+      activeGoalsCount: parseInt(json['active_goals_count']),
       goals: rawGoals.map((e) => SavingsGoalModel.fromJson(e as Map<String, dynamic>)).toList(),
     );
   }
@@ -110,7 +112,7 @@ class ContributionModel {
       id: json['id'] as String,
       goalId: json['goal_id'] as String,
       userId: json['user_id'] as String,
-      amount: (json['amount'] as num).toDouble(),
+      amount: parseDouble(json['amount']),
       date: DateTime.parse(json['date'] as String),
       note: json['note'] as String?,
       createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'] as String) : null,

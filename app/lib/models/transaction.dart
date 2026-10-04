@@ -1,3 +1,5 @@
+import '../utils/json.dart';
+
 class TransactionModel {
   final String id;
   final String userId;
@@ -34,7 +36,7 @@ class TransactionModel {
       userId: json['user_id'] as String,
       accountId: json['account_id'] as String?,
       type: json['type'] as String? ?? 'expense',
-      amount: (json['amount'] as num).toDouble(),
+      amount: parseDouble(json['amount']),
       description: json['description'] as String? ?? '',
       category: json['category'] as String? ?? 'General',
       date: DateTime.parse(json['date'] as String),
@@ -76,9 +78,9 @@ class TransactionListResponse {
     final rawList = json['items'] as List<dynamic>? ?? [];
     return TransactionListResponse(
       items: rawList.map((e) => TransactionModel.fromJson(e as Map<String, dynamic>)).toList(),
-      total: json['total'] as int? ?? 0,
-      page: json['page'] as int? ?? 1,
-      size: json['size'] as int? ?? 50,
+      total: parseInt(json['total']),
+      page: parseInt(json['page'], 1),
+      size: parseInt(json['size'], 50),
     );
   }
 }

@@ -1,3 +1,5 @@
+import '../utils/json.dart';
+
 class UserModel {
   final String id;
   final String email;
@@ -28,8 +30,8 @@ class UserModel {
       fullName: json['full_name'] as String,
       phone: json['phone'] as String?,
       currency: json['currency'] as String? ?? 'INR',
-      monthlyIncomeTarget: (json['monthly_income_target'] as num?)?.toDouble(),
-      monthlySavingsTarget: (json['monthly_savings_target'] as num?)?.toDouble(),
+      monthlyIncomeTarget: parseDoubleOrNull(json['monthly_income_target']),
+      monthlySavingsTarget: parseDoubleOrNull(json['monthly_savings_target']),
       isActive: json['is_active'] as bool? ?? true,
       createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'] as String) : null,
     );
