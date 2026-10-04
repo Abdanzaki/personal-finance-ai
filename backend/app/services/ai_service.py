@@ -258,7 +258,8 @@ def generate_grounded_ai_response(
         f"USER QUESTION:\n{user_message}"
     )
 
-    # 3. Invoke Gemini (with retries for transient provider hiccups)
+    # 3. Invoke Gemini (with retries for transient provider hiccups,
+    #    falling back to a second model if the primary stays overloaded)
     try:
         from google import genai
         from google.genai import types
@@ -267,32 +268,33 @@ def generate_grounded_ai_response(
 
         client = genai.Client(api_key=api_key)
         last_err: Exception | None = None
-        for attempt in range(3):
-            try:
-                response = client.models.generate_content(
-                    model="gemini-3.8-flash",
-                    contents=prompt_content,
-                    config=types.GenerateContentConfig(
-                        system_instruction=SYSTEM_INSTRUCTION,
-                        temperature=0.2,
-                    ),
-                )
-                answer = response.text or "I reviewed your financial records, but could not produce a response."
-                return answer.strip(), facts_used
-            except (ClientError, APIError) as e:
-                err_str = str(e).lower()
-                err_code = getattr(e, "code", None)
-                # Transient overload / rate limit — back off and retry.
-                if (
-                    err_code in (429, 500, 502, 503)
-                    or "unavailable" in err_str
-                    or "overloaded" in err_str
-                    or "resource_exhausted" in err_str
-                ):
-                    last_err = e
-                    time.sleep(2 * (attempt + 1))
-                    continue
-                raise
+        for model_name in ("gemini-3.8-flash", "gemma-4-26b-a4b-it"):
+            for attempt in range(2):
+                try:
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=prompt_content,
+                        config=types.GenerateContentConfig(
+                            system_instruction=SYSTEM_INSTRUCTION,
+                            temperature=0.2,
+                        ),
+                    )
+                    answer = response.text or "I reviewed your financial records, but could not produce a response."
+                    return answer.strip(), facts_used
+                except (ClientError, APIError) as e:
+                    err_str = str(e).lower()
+                    err_code = getattr(e, "code", None)
+                    # Transient overload / rate limit — back off and retry.
+                    if (
+                        err_code in (429, 500, 502, 503)
+                        or "unavailable" in err_str
+                        or "overloaded" in err_str
+                        or "resource_exhausted" in err_str
+                    ):
+                        last_err = e
+                        time.sleep(2 * (attempt + 1))
+                        continue
+                    raise
         # Retries exhausted — let the handlers below report the last error.
         assert last_err is not None
         raise last_err
