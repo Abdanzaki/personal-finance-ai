@@ -11,14 +11,19 @@ jobs:
     name: Copy Render Postgres to Neon
     runs-on: ubuntu-latest
     steps:
-      - name: Install PostgreSQL client
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+      - name: Install PostgreSQL 18 client
+        run: |
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          wget -qO- https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /etc/apt/trusted.gpg.d/pgdg.asc > /dev/null
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-18
+          pg_dump --version
 
       - name: Dump from Render and restore into Neon
         env:
           RENDER_DATABASE_URL: ${{ secrets.RENDER_DATABASE_URL }}
           NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
         run: |
+          set -o pipefail
           pg_dump --no-owner --no-acl "$RENDER_DATABASE_URL" | psql "$NEON_DATABASE_URL" -v ON_ERROR_STOP=1 -q
 
       - name: Verify row counts on Neon
