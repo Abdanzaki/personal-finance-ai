@@ -24,12 +24,15 @@ jobs:
           NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
         run: |
           set -o pipefail
+          export PATH=/usr/lib/postgresql/18/bin:$PATH
+          pg_dump --version
           pg_dump --no-owner --no-acl "$RENDER_DATABASE_URL" | psql "$NEON_DATABASE_URL" -v ON_ERROR_STOP=1 -q
 
       - name: Verify row counts on Neon
         env:
           NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
         run: |
+          export PATH=/usr/lib/postgresql/18/bin:$PATH
           psql "$NEON_DATABASE_URL" -c "
             SELECT 'users', count(*) FROM users
             UNION ALL SELECT 'accounts', count(*) FROM accounts
