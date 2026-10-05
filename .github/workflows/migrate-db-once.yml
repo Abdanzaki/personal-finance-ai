@@ -1,0 +1,35 @@
+name: One-time DB migration (Render to Neon)
+
+# Manual one-off job: copies all data from the Render Postgres database
+# into the Neon Postgres database. Run once via workflow_dispatch, then
+# delete this file and the RENDER_DATABASE_URL / NEON_DATABASE_URL secrets.
+on:
+  workflow_dispatch:
+
+jobs:
+  migrate:
+    name: Copy Render Postgres to Neon
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install PostgreSQL client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+
+      - name: Dump from Render and restore into Neon
+        env:
+          RENDER_DATABASE_URL: ${{ secrets.RENDER_DATABASE_URL }}
+          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: |
+          pg_dump --no-owner --no-acl "$RENDER_DATABASE_URL" | psql "$NEON_DATABASE_URL" -v ON_ERROR_STOP=1 -q
+
+      - name: Verify row counts on Neon
+        env:
+          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: |
+          psql "$NEON_DATABASE_URL" -c "
+            SELECT 'users', count(*) FROM users
+            UNION ALL SELECT 'accounts', count(*) FROM accounts
+            UNION ALL SELECT 'transactions', count(*) FROM transactions
+            UNION ALL SELECT 'budgets', count(*) FROM budgets
+            UNION ALL SELECT 'savings_goals', count(*) FROM savings_goals
+            UNION ALL SELECT 'goal_contributions', count(*) FROM goal_contributions
+            UNION ALL SELECT 'ai_chat_messages', count(*) FROM ai_chat_messages;"
